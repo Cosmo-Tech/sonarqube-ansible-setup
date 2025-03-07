@@ -1,0 +1,49 @@
+---
+# PostgreSQL role tasks
+
+- name: Install PostgreSQL {{ postgresql_version }}
+  ansible.builtin.apt:
+    name:
+      - postgresql-{{ postgresql_version }}
+      - postgresql-contrib-{{ postgresql_version }}
+    state: present
+    update_cache: true
+
+- name: Ensure PostgreSQL service is running and enabled
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Create database user for SonarQube
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_user }}"
+    password: "{{ postgresql_password }}"
+    encrypted: true # Store password encrypted in database
+    state: present
+
+- name: Create database for SonarQube
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_db }}"
+    owner: "{{ postgresql_user }}"
+    encoding: "{{ postgresql_encoding }}"
+    template: "{{ postgresql_template }}"
+    state: present
+
+- name: Create schema for SonarQube
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_query:
+    db: "{{ postgresql_db }}"
+    query: "CREATE SCHEMA IF NOT EXISTS {{ postgresql_schema }} AUTHORIZATION {{ postgresql_user }};"
+
+- name: Grant privileges on schema to SonarQube user
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_query:
+    db: "{{ postgresql_db }}"
+    query: "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA {{ postgresql_schema }} TO {{ postgresql_user }};"

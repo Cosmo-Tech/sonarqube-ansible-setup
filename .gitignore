@@ -1,0 +1,25 @@
+# Vagrant
+.vagrant/
+*.log
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ansible
+*.retry
+
+# Environment variables
+.env
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db

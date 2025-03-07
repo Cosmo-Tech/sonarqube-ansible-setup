@@ -1,0 +1,94 @@
+---
+# SonarQube role tasks
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: true
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible.builtin.lookup('pipe', 'lsb_release -cs') }} stable"
+    state: present
+    update_cache: true
+
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin  # This installs Docker Compose V2
+    state: present
+    update_cache: true
+
+- name: Set sysctl parameters for SonarQube
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    state: present
+    reload: true
+
+- name: Create SonarQube directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ sonarqube_data_dir }}"
+    - "{{ sonarqube_extensions_dir }}"
+    - "{{ sonarqube_logs_dir }}"
+    - "{{ sonarqube_temp_dir }}"
+
+- name: Create Docker Compose directory
+  ansible.builtin.file:
+    path: "{{ sonarqube_base_dir }}/docker"
+    state: directory
+    mode: "0755"
+
+- name: Copy Docker Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ sonarqube_base_dir }}/docker/docker-compose.yml"
+    mode: "0644"
+
+- name: Pull SonarQube image
+  ansible.builtin.command:
+    cmd: docker pull sonarqube:{{ sonarqube_version }}
+  changed_when: true
+
+- name: Check if SonarQube is running
+  ansible.builtin.command:
+    cmd: docker compose ps -q sonarqube
+    chdir: "{{ sonarqube_base_dir }}/docker"
+  register: sonarqube_status
+  changed_when: false
+  failed_when: false
+
+- name: Start SonarQube with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ sonarqube_base_dir }}/docker"
+  register: compose_output
+  changed_when: compose_output.rc == 0
+  when: sonarqube_status.stdout == ""
+
+- name: Wait for SonarQube to be ready
+  ansible.builtin.uri:
+    url: "http://localhost:{{ sonarqube_port }}"
+    return_content: true
+  register: sonarqube_health
+  until: sonarqube_health.status == 200
+  retries: 60
+  delay: 5

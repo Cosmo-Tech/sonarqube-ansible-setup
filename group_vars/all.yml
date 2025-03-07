@@ -1,0 +1,15 @@
+---
+# Common variables for PostgreSQL and SonarQube
+postgresql_version: "15"
+postgresql_user: "sonarqube"
+postgresql_password: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD') }}"
+postgresql_db: "sonarqube"
+postgresql_schema: "sonarqube"
+
+# SonarQube variables
+sonarqube_version: "9.9.0.65466"
+sonarqube_home: "/opt/sonarqube"
+sonarqube_db_user: "{{ postgresql_user }}"
+sonarqube_db_password: "{{ postgresql_password }}"
+sonarqube_db_name: "{{ postgresql_db }}"
+sonarqube_db_schema: "{{ postgresql_schema }}"
