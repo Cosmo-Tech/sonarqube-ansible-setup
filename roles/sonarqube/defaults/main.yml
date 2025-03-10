@@ -1,3 +1,19 @@
 ---
-# SonarQube role default variables - role-specific settings only
-# Common variables are defined in group_vars/all.yml
+# SonarQube role default variables
+sonarqube_version: "9.9.0.65466"
+sonarqube_port: "9000"
+
+# Directories
+sonarqube_base_dir: "/opt/sonarqube"
+sonarqube_data_dir: "{{ sonarqube_base_dir }}/data"
+sonarqube_extensions_dir: "{{ sonarqube_base_dir }}/extensions"
+sonarqube_logs_dir: "{{ sonarqube_base_dir }}/logs"
+sonarqube_temp_dir: "{{ sonarqube_base_dir }}/temp"
+
+# Database connection
+sonarqube_db_user: "{{ postgresql_user }}"
+sonarqube_db_password: "{{ postgresql_password }}"
+sonarqube_db_name: "{{ postgresql_db }}"
+sonarqube_db_schema: "{{ postgresql_schema }}"
+sonarqube_db_host: "localhost"
+sonarqube_db_port: "5432"

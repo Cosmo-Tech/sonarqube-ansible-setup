@@ -148,11 +148,11 @@ Default credentials:
 ## Customization
 
 You can customize the installation by modifying the variables in:
-- `group_vars/all.yml` - Contains all common variables for all environments
+- `group_vars/all.yml` - Contains common variables for all environments
 - `inventories/dev/group_vars/all.yml` - Contains only development-specific overrides
-- `roles/*/defaults/main.yml` - Contains only role-specific settings not defined in group_vars
+- `roles/*/defaults/main.yml` - Contains role-specific settings
 
-The project has been simplified to centralize most variables in `group_vars/all.yml` to reduce duplication and make maintenance easier.
+The project has been simplified to reduce duplication and make maintenance easier. Role-specific variables are kept in their respective role defaults to ensure they're always available when the role is executed, while common variables are centralized in group_vars/all.yml.
 
 ## Vagrant VM Specifications
 

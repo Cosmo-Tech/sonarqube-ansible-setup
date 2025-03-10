@@ -1,3 +1,16 @@
 ---
-# Docker role default variables - role-specific settings only
-# Common variables are defined in group_vars/all.yml
+# Docker role default variables
+docker_prerequisites:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+docker_gpg_key: https://download.docker.com/linux/ubuntu/gpg
