@@ -3,13 +3,6 @@
   hosts: all
   become: true
   vars:
-    # Docker settings
-    docker_packages:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-compose-plugin
-
     # PostgreSQL settings
     postgresql_version: "15"
     postgresql_user: "sonarqube"
@@ -18,19 +11,22 @@
     postgresql_schema: "sonarqube"
     
     # SonarQube settings
-    sonarqube_version: "9.9.0.65466"
+    sonarqube_version: "10.3.0.82913"
+    sonarqube_latest_version: "10.3.0.82913"
     sonarqube_port: "9000"
     sonarqube_base_dir: "/opt/sonarqube"
     sonarqube_data_dir: "{{ sonarqube_base_dir }}/data"
     sonarqube_extensions_dir: "{{ sonarqube_base_dir }}/extensions"
     sonarqube_logs_dir: "{{ sonarqube_base_dir }}/logs"
     sonarqube_temp_dir: "{{ sonarqube_base_dir }}/temp"
+    sonarqube_install_dir: "{{ sonarqube_base_dir }}/sonarqube-{{ sonarqube_version }}"
     sonarqube_db_user: "{{ postgresql_user }}"
     sonarqube_db_password: "{{ postgresql_password }}"
     sonarqube_db_name: "{{ postgresql_db }}"
     sonarqube_db_schema: "{{ postgresql_schema }}"
     sonarqube_db_host: "localhost"
     sonarqube_db_port: "5432"
+    sonarqube_java_opts: "-Xmx2048m -Xms1024m"
 
   pre_tasks:
     - name: Create base directories
@@ -40,10 +36,6 @@
         mode: "0755"
 
   tasks:
-    - name: Include Docker role
-      include_role:
-        name: docker
-
     - name: Include PostgreSQL role
       include_role:
         name: postgresql

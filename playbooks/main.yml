@@ -7,12 +7,6 @@
   roles:
     - debug_tools
 
-- name: Install and configure Docker
-  hosts: sonarqube
-  become: true
-  roles:
-    - docker
-
 - name: Install and configure PostgreSQL for SonarQube
   hosts: sonarqube
   become: true

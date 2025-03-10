@@ -18,10 +18,10 @@ This project contains Ansible playbooks and configuration files to set up and ma
 ├── playbooks/            # Playbook directory
 │   └── main.yml          # Main playbook that includes roles
 ├── roles/                # Roles directory
-│   ├── docker/           # Docker role
-│   │   ├── defaults/     # Default variables for Docker
+│   ├── debug_tools/      # Debug tools role
+│   │   ├── defaults/     # Default variables for debug tools
 │   │   │   └── main.yml
-│   │   └── tasks/        # Tasks for Docker installation
+│   │   └── tasks/        # Tasks for debug tools installation
 │   │       └── main.yml
 │   ├── postgresql/       # PostgreSQL role
 │   │   ├── defaults/     # Default variables for PostgreSQL
@@ -36,7 +36,8 @@ This project contains Ansible playbooks and configuration files to set up and ma
 │       ├── tasks/        # Tasks for SonarQube installation
 │       │   └── main.yml
 │       └── templates/    # Templates for SonarQube
-│           └── docker-compose.yml.j2  # Docker Compose template
+│           ├── sonar.properties.j2  # SonarQube properties template
+│           └── sonarqube.service.j2 # Systemd service template
 ├── tests/                # Test directory
 │   ├── integration/      # Integration tests
 │   │   └── test_sonarqube.py
@@ -57,8 +58,8 @@ This project contains Ansible playbooks and configuration files to set up and ma
 - VirtualBox
 - Vagrant
 - Ansible
-- Docker (for testing)
 - Python 3.8 or later
+- Java 17 or later (for SonarQube)
 
 ## Setup
 
@@ -81,12 +82,10 @@ pip install -r requirements.txt
 ```sh
 # Ubuntu/Debian
 sudo apt-get update
-sudo apt-get install -y virtualbox vagrant docker.io
+sudo apt-get install -y virtualbox vagrant openjdk-17-jdk
 
-# Enable Docker
-sudo systemctl enable docker
-sudo systemctl start docker
-sudo usermod -aG docker $USER  # Log out and back in after this
+# Verify Java installation
+java -version
 ```
 
 2. For production, set the required environment variable for the PostgreSQL password:

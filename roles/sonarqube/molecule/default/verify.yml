@@ -5,25 +5,15 @@
   vars:
     sonarqube_port: "9000"
     sonarqube_base_dir: "/opt/sonarqube"
+    sonarqube_version: "10.3.0.82913"
+    sonarqube_install_dir: "{{ sonarqube_base_dir }}/sonarqube-{{ sonarqube_version }}"
 
   tasks:
-    - name: Verify Docker is installed and running
-      ansible.builtin.service:
-        name: docker
-        state: started
-      register: docker_status
-      failed_when: not docker_status.status.ActiveState == "active"
-
-    - name: Check Docker version
-      ansible.builtin.command: docker --version
-      register: docker_version
+    - name: Verify Java is installed
+      ansible.builtin.command: java -version
+      register: java_version
       changed_when: false
-
-    - name: Check Docker Compose is installed
-      ansible.builtin.command: docker compose version
-      register: compose_version
-      changed_when: false
-      failed_when: compose_version.rc != 0
+      failed_when: java_version.rc != 0
 
     - name: Verify SonarQube directories exist
       ansible.builtin.stat:
@@ -31,23 +21,31 @@
       register: dir_check
       failed_when: not dir_check.stat.exists or not dir_check.stat.isdir
       loop:
-        - "{{ sonarqube_base_dir }}/data"
-        - "{{ sonarqube_base_dir }}/extensions"
-        - "{{ sonarqube_base_dir }}/logs"
-        - "{{ sonarqube_base_dir }}/temp"
-        - "{{ sonarqube_base_dir }}/docker"
+        - "{{ sonarqube_base_dir }}"
+        - "{{ sonarqube_data_dir }}"
+        - "{{ sonarqube_extensions_dir }}"
+        - "{{ sonarqube_logs_dir }}"
+        - "{{ sonarqube_temp_dir }}"
+        - "{{ sonarqube_install_dir }}"
 
-    - name: Verify Docker Compose file exists
+    - name: Verify SonarQube configuration file exists
       ansible.builtin.stat:
-        path: "{{ sonarqube_base_dir }}/docker/docker-compose.yml"
-      register: compose_file
-      failed_when: not compose_file.stat.exists
+        path: "{{ sonarqube_install_dir }}/conf/sonar.properties"
+      register: config_file
+      failed_when: not config_file.stat.exists
 
-    - name: Check if SonarQube container is running
-      ansible.builtin.command: docker ps -q --filter "name=sonarqube"
-      register: container_check
-      changed_when: false
-      failed_when: container_check.stdout == ""
+    - name: Verify SonarQube service file exists
+      ansible.builtin.stat:
+        path: "/etc/systemd/system/sonarqube.service"
+      register: service_file
+      failed_when: not service_file.stat.exists
+
+    - name: Verify SonarQube service is running
+      ansible.builtin.service:
+        name: sonarqube
+        state: started
+      register: sonarqube_service
+      failed_when: not sonarqube_service.status.ActiveState == "active"
 
     - name: Wait for SonarQube to be available
       ansible.builtin.uri:
@@ -68,7 +66,7 @@
       failed_when: "'status' not in api_response.content"
 
     - name: Check SonarQube logs for errors
-      ansible.builtin.command: docker logs --tail 50 sonarqube
+      ansible.builtin.command: grep ERROR "{{ sonarqube_logs_dir }}/sonar.log" -c
       register: logs
       changed_when: false
-      failed_when: "'ERROR' in logs.stdout"
+      failed_when: logs.stdout|int > 0

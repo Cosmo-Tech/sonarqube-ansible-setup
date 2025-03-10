@@ -1,6 +1,7 @@
 ---
 # SonarQube role default variables
-sonarqube_version: "latest"
+sonarqube_version: "10.3.0.82913"  # Specific version to download
+sonarqube_latest_version: "10.3.0.82913"  # Used when sonarqube_version is set to "latest"
 sonarqube_port: "9000"
 
 # Directories
@@ -9,11 +10,15 @@ sonarqube_data_dir: "{{ sonarqube_base_dir }}/data"
 sonarqube_extensions_dir: "{{ sonarqube_base_dir }}/extensions"
 sonarqube_logs_dir: "{{ sonarqube_base_dir }}/logs"
 sonarqube_temp_dir: "{{ sonarqube_base_dir }}/temp"
+sonarqube_install_dir: "{{ sonarqube_base_dir }}/sonarqube-{{ sonarqube_version if sonarqube_version != 'latest' else sonarqube_latest_version }}"
 
 # Database connection
 sonarqube_db_user: "{{ postgresql_user }}"
 sonarqube_db_password: "{{ postgresql_password }}"
 sonarqube_db_name: "{{ postgresql_db }}"
 sonarqube_db_schema: "{{ postgresql_schema }}"
-sonarqube_db_host: "host.docker.internal"  # Special Docker hostname to access host machine
+sonarqube_db_host: "localhost"  # Direct connection to local PostgreSQL
 sonarqube_db_port: "5432"
+
+# Java options
+sonarqube_java_opts: "-Xmx2048m -Xms2048m"

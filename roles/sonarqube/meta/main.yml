@@ -1,6 +1,5 @@
 ---
 dependencies:
-  - role: docker
   - role: postgresql
 
 galaxy_info:

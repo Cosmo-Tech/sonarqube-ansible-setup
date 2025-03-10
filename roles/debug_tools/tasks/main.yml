@@ -3,7 +3,7 @@
 
 - name: Install common debugging tools
   ansible.builtin.package:
-    name: 
+    name:
       - htop
       - vim
     state: present
@@ -43,7 +43,7 @@
     dest: /usr/local/bin/bat
     state: link
   become: true
-  when: 
+  when:
     - ansible_os_family == "Debian"
     - bat_available.rc != 0
     - debug_tools_bat_alt_package == "batcat"

@@ -16,8 +16,8 @@ Vagrant.configure("2") do |config|
   
   # VM Resources
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "4096"  # SonarQube needs at least 4GB
-    vb.cpus = 2
+    vb.memory = "8192"  # SonarQube needs at least 4GB
+    vb.cpus = 4
     vb.name = "sonarqube-dev"
   end
   
