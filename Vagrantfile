@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   # Bootstrap script to prepare the VM for Ansible
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y python3 python3-pip psycopg2
+    apt-get install -y python3 python3-pip
     echo "VM is ready for Ansible provisioning"
   SHELL
 

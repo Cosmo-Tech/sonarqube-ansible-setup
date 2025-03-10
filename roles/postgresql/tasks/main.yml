@@ -1,6 +1,14 @@
 ---
 # PostgreSQL role tasks
 
+- name: Install PostgreSQL Python dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-psycopg2
+      - libpq-dev
+    state: present
+    update_cache: true
+
 - name: Install PostgreSQL {{ postgresql_version }}
   ansible.builtin.apt:
     name:

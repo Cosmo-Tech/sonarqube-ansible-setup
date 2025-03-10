@@ -34,6 +34,11 @@
     cmd: docker pull sonarqube:{{ sonarqube_version }}
   changed_when: true
 
+- name: Check if Docker Compose file exists
+  ansible.builtin.stat:
+    path: "{{ sonarqube_base_dir }}/docker/docker-compose.yml"
+  register: compose_file
+
 - name: Check if SonarQube is running
   ansible.builtin.command:
     cmd: docker compose ps -q sonarqube
@@ -41,6 +46,7 @@
   register: sonarqube_status
   changed_when: false
   failed_when: false
+  when: compose_file.stat.exists
 
 - name: Start SonarQube with Docker Compose
   ansible.builtin.command:
@@ -48,7 +54,7 @@
     chdir: "{{ sonarqube_base_dir }}/docker"
   register: compose_output
   changed_when: compose_output.rc == 0
-  when: sonarqube_status.stdout == ""
+  when: not compose_file.stat.exists or sonarqube_status.stdout == ""
 
 - name: Wait for SonarQube to be ready
   ansible.builtin.uri:
