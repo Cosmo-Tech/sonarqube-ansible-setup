@@ -1,0 +1,13 @@
+---
+# Ansible Galaxy Role Dependencies
+collections:
+  - name: community.postgresql
+    version: 3.2.0
+  - name: community.general
+    version: 7.5.0
+  - name: community.docker
+    version: 3.4.11
+  - name: ansible.posix
+    version: 1.5.4
+
+# Development and testing dependencies are in requirements.txt

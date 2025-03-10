@@ -1,15 +1,46 @@
 ---
-# Common variables for PostgreSQL and SonarQube
+# Common variables for all environments
+
+# PostgreSQL settings
 postgresql_version: "15"
 postgresql_user: "sonarqube"
 postgresql_password: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD') }}"
 postgresql_db: "sonarqube"
 postgresql_schema: "sonarqube"
+postgresql_encoding: "UTF-8"
+postgresql_template: "template0"
 
-# SonarQube variables
+# SonarQube settings
 sonarqube_version: "9.9.0.65466"
-sonarqube_home: "/opt/sonarqube"
+sonarqube_port: "9000"
+
+# Directories
+sonarqube_base_dir: "/opt/sonarqube"
+sonarqube_data_dir: "{{ sonarqube_base_dir }}/data"
+sonarqube_extensions_dir: "{{ sonarqube_base_dir }}/extensions"
+sonarqube_logs_dir: "{{ sonarqube_base_dir }}/logs"
+sonarqube_temp_dir: "{{ sonarqube_base_dir }}/temp"
+
+# Database connection
 sonarqube_db_user: "{{ postgresql_user }}"
 sonarqube_db_password: "{{ postgresql_password }}"
 sonarqube_db_name: "{{ postgresql_db }}"
 sonarqube_db_schema: "{{ postgresql_schema }}"
+sonarqube_db_host: "localhost"
+sonarqube_db_port: "5432"
+
+# Docker settings
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+docker_prerequisites:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+
+docker_gpg_key: https://download.docker.com/linux/ubuntu/gpg

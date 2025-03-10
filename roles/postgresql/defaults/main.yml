@@ -1,9 +1,5 @@
 ---
-# PostgreSQL role default variables
-postgresql_version: "15"
-postgresql_user: "sonarqube"
-postgresql_password: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD') }}"
-postgresql_db: "sonarqube"
-postgresql_schema: "sonarqube"
+# PostgreSQL role default variables - role-specific settings only
+# Common variables are defined in group_vars/all.yml
 postgresql_encoding: "UTF-8"
 postgresql_template: "template0"

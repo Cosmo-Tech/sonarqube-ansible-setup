@@ -1,0 +1,61 @@
+---
+# Simplified test configuration
+- name: Syntax check and linting
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_root: "{{ lookup('env', 'PWD') }}"
+    test_inventory: "{{ project_root }}/inventories/dev/hosts"
+    common_env:
+      ANSIBLE_ROLES_PATH: "{{ project_root }}/roles"
+      ANSIBLE_CONFIG: "{{ project_root }}/inventories/dev/ansible.cfg"
+
+  pre_tasks:
+    - name: Verify required files exist
+      ansible.builtin.stat:
+        path: "{{ project_root }}/{{ item }}"
+      loop:
+        - "playbooks/main.yml"
+        - "inventories/dev/ansible.cfg"
+        - ".ansible-lint"
+      register: file_check
+      failed_when: not file_check.stat.exists
+
+  tasks:
+    - name: Check playbook syntax
+      ansible.builtin.command: >
+        ansible-playbook
+        -i {{ test_inventory }}
+        --syntax-check
+        {{ project_root }}/playbooks/main.yml
+      environment: "{{ common_env }}"
+      register: syntax_check
+      changed_when: false
+      failed_when: syntax_check.rc != 0
+
+    - name: Run ansible-lint on entire project
+      ansible.builtin.command: ansible-lint
+      args:
+        chdir: "{{ project_root }}"
+      environment: "{{ common_env }}"
+      register: lint_result
+      changed_when: false
+      failed_when: lint_result.rc != 0
+      ignore_errors: true  # Continue even if linting fails
+
+    - name: Display results
+      ansible.builtin.debug:
+        msg: |
+          Test results:
+          - Playbook syntax: {{ 'PASS' if syntax_check.rc == 0 else 'FAIL' }}
+          - Project linting: {{ 'PASS' if lint_result.rc == 0 else 'FAIL' }}
+
+          {% if syntax_check.stderr is defined and syntax_check.stderr != '' %}
+          Syntax errors:
+          {{ syntax_check.stderr }}
+          {% endif %}
+
+          {% if lint_result.stderr is defined and lint_result.stderr != '' %}
+          Linting errors:
+          {{ lint_result.stderr }}
+          {% endif %}

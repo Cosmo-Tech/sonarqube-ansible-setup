@@ -1,0 +1,60 @@
+---
+# Docker role tasks
+
+# Prerequisites
+- name: Install required packages
+  ansible.builtin.apt:
+    name: "{{ docker_prerequisites }}"
+    state: present
+    update_cache: true
+
+- name: Get distribution information
+  ansible.builtin.setup:
+    filter: ansible_distribution*
+  when: ansible_distribution is not defined
+
+- name: Get OS codename if not defined
+  ansible.builtin.command: lsb_release -cs
+  register: os_codename
+  changed_when: false
+  when: ansible_distribution_release is not defined
+
+- name: Set distribution codename fact
+  ansible.builtin.set_fact:
+    distro_codename: "{{ ansible_distribution_release | default(os_codename.stdout) }}"
+
+- name: Set OS type fact
+  ansible.builtin.set_fact:
+    os_type: "{{ ansible_distribution | default('Ubuntu') | lower }}"
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: "{{ docker_gpg_key }}"
+    state: present
+
+- name: Add Docker repository for Ubuntu
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ distro_codename }} stable"
+    state: present
+    update_cache: true
+  when: os_type == 'ubuntu'
+
+- name: Add Docker repository for Debian
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ distro_codename }} stable"
+    state: present
+    update_cache: true
+  when: os_type == 'debian'
+
+# Installation
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: true
+
+- name: Ensure Docker service is running and enabled
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

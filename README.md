@@ -8,16 +8,21 @@ This project contains Ansible playbooks and configuration files to set up and ma
 .
 ├── ansible.cfg           # Ansible configuration
 ├── group_vars/           # Variables shared across playbooks
-│   └── all.yml           # Common variables for all hosts
+│   └── all.yml           # Common variables for all environments
 ├── hosts.ini             # Inventory file for production
 ├── inventories/          # Environment-specific inventories
 │   └── dev/              # Development environment
 │       ├── hosts         # Development hosts file
-│       └── group_vars/   # Development variables
-│           └── all.yml   # Development-specific variables
+│       └── group_vars/   # Development-specific variables
+│           └── all.yml   # Only contains overrides from group_vars/all.yml
 ├── playbooks/            # Playbook directory
 │   └── main.yml          # Main playbook that includes roles
 ├── roles/                # Roles directory
+│   ├── docker/           # Docker role
+│   │   ├── defaults/     # Default variables for Docker
+│   │   │   └── main.yml
+│   │   └── tasks/        # Tasks for Docker installation
+│   │       └── main.yml
 │   ├── postgresql/       # PostgreSQL role
 │   │   ├── defaults/     # Default variables for PostgreSQL
 │   │   │   └── main.yml
@@ -26,10 +31,18 @@ This project contains Ansible playbooks and configuration files to set up and ma
 │   └── sonarqube/        # SonarQube role
 │       ├── defaults/     # Default variables for SonarQube
 │       │   └── main.yml
+│       ├── meta/         # Role metadata
+│       │   └── main.yml
 │       ├── tasks/        # Tasks for SonarQube installation
 │       │   └── main.yml
 │       └── templates/    # Templates for SonarQube
 │           └── docker-compose.yml.j2  # Docker Compose template
+├── tests/                # Test directory
+│   ├── integration/      # Integration tests
+│   │   └── test_sonarqube.py
+│   ├── conftest.py       # Pytest configuration
+│   ├── run_tests.py      # Test runner script
+│   └── syntax_check.yml  # Syntax and linting checks
 └── Vagrantfile           # Vagrant configuration for local development
 ```
 
@@ -135,10 +148,11 @@ Default credentials:
 ## Customization
 
 You can customize the installation by modifying the variables in:
-- `group_vars/all.yml` - For global production variables
-- `inventories/dev/group_vars/all.yml` - For development environment variables
-- `roles/postgresql/defaults/main.yml` - For PostgreSQL-specific settings
-- `roles/sonarqube/defaults/main.yml` - For SonarQube-specific settings
+- `group_vars/all.yml` - Contains all common variables for all environments
+- `inventories/dev/group_vars/all.yml` - Contains only development-specific overrides
+- `roles/*/defaults/main.yml` - Contains only role-specific settings not defined in group_vars
+
+The project has been simplified to centralize most variables in `group_vars/all.yml` to reduce duplication and make maintenance easier.
 
 ## Vagrant VM Specifications
 
@@ -155,21 +169,22 @@ This project includes comprehensive testing mechanisms to ensure proper function
 
 ### Running All Tests
 
-Use the helper script to run all tests in sequence:
+Use the simplified test runner script:
 
 ```sh
 # For Vagrant environment
-VAGRANT_TEST=true ./tests/run_tests.sh
+python tests/run_tests.py --vagrant
 
 # For production environment
-SONARQUBE_HOST=<your-server-ip> ./tests/run_tests.sh
+python tests/run_tests.py --host=<your-server-ip>
+
+# To skip integration tests
+python tests/run_tests.py --vagrant --skip-integration
 ```
 
 This will run:
-1. Syntax and linting checks
-2. Molecule tests for PostgreSQL role
-3. Molecule tests for SonarQube role
-4. Integration tests
+1. Syntax and linting checks (combined in a single step)
+2. Integration tests (if not skipped)
 
 ### Running Individual Tests
 

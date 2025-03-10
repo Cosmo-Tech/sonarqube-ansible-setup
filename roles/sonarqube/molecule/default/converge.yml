@@ -1,0 +1,53 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  vars:
+    # Docker settings
+    docker_packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+
+    # PostgreSQL settings
+    postgresql_version: "15"
+    postgresql_user: "sonarqube"
+    postgresql_password: "{{ lookup('env', 'SONARQUBE_DB_PASSWORD') | default('sonarqube', true) }}"  # Default password for tests
+    postgresql_db: "sonarqube"
+    postgresql_schema: "sonarqube"
+    
+    # SonarQube settings
+    sonarqube_version: "9.9.0.65466"
+    sonarqube_port: "9000"
+    sonarqube_base_dir: "/opt/sonarqube"
+    sonarqube_data_dir: "{{ sonarqube_base_dir }}/data"
+    sonarqube_extensions_dir: "{{ sonarqube_base_dir }}/extensions"
+    sonarqube_logs_dir: "{{ sonarqube_base_dir }}/logs"
+    sonarqube_temp_dir: "{{ sonarqube_base_dir }}/temp"
+    sonarqube_db_user: "{{ postgresql_user }}"
+    sonarqube_db_password: "{{ postgresql_password }}"
+    sonarqube_db_name: "{{ postgresql_db }}"
+    sonarqube_db_schema: "{{ postgresql_schema }}"
+    sonarqube_db_host: "localhost"
+    sonarqube_db_port: "5432"
+
+  pre_tasks:
+    - name: Create base directories
+      ansible.builtin.file:
+        path: "{{ sonarqube_base_dir }}"
+        state: directory
+        mode: "0755"
+
+  tasks:
+    - name: Include Docker role
+      include_role:
+        name: docker
+
+    - name: Include PostgreSQL role
+      include_role:
+        name: postgresql
+
+    - name: Include SonarQube role
+      include_role:
+        name: sonarqube

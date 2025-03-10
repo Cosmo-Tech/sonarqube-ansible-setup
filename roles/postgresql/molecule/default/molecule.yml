@@ -1,0 +1,25 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+platforms:
+  - name: postgresql-test
+    box: debian/bookworm64
+    memory: 2048
+    cpus: 2
+    interfaces:
+      - network_name: private_network
+        ip: 192.168.56.20
+provisioner:
+  name: ansible
+  env:
+    SONARQUBE_DB_PASSWORD: testpassword
+verifier:
+  name: ansible
+lint: |
+  set -e
+  ansible-lint
+  yamllint .

@@ -1,0 +1,3 @@
+---
+# Docker role default variables - role-specific settings only
+# Common variables are defined in group_vars/all.yml

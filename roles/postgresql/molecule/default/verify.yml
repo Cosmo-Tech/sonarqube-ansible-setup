@@ -1,0 +1,77 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  vars:
+    postgresql_user: "sonarqube"
+    postgresql_password: "{{ lookup('env', 'SONARQUBE_DB_PASSWORD') }}"
+    postgresql_db: "sonarqube"
+    postgresql_schema: "sonarqube"
+
+  tasks:
+    - name: Verify PostgreSQL is running
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+      register: pg_status
+      failed_when: not pg_status.status.ActiveState == "active"
+
+    - name: Check PostgreSQL version
+      ansible.builtin.command: psql --version
+      register: pg_version
+      changed_when: false
+      failed_when: "'15.' not in pg_version.stdout"
+
+    - name: Verify database exists
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ postgresql_db }}"
+        state: present
+      register: db_exists
+      failed_when: not db_exists.exists
+
+    - name: Verify user exists
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ postgresql_user }}"
+        state: present
+      register: user_exists
+      failed_when: not user_exists.exists
+
+    - name: Verify schema exists
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_query:
+        db: "{{ postgresql_db }}"
+        query: >
+          SELECT EXISTS(
+            SELECT 1 FROM information_schema.schemata 
+            WHERE schema_name = '{{ postgresql_schema }}'
+          );
+      register: schema_check
+      failed_when: not schema_check.query_result[0][0]
+
+    - name: Verify user permissions
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_query:
+        db: "{{ postgresql_db }}"
+        query: >
+          SELECT has_schema_privilege('{{ postgresql_user }}', 
+                                   '{{ postgresql_schema }}', 
+                                   'USAGE, CREATE');
+      register: perm_check
+      failed_when: not perm_check.query_result[0][0]
+
+    - name: Test database connection as application user
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_query:
+        db: "{{ postgresql_db }}"
+        login_user: "{{ postgresql_user }}"
+        login_password: "{{ postgresql_password }}"
+        query: "SELECT 1;"
+      register: connection_test
+      failed_when: connection_test.query_result[0][0] != 1

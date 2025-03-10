@@ -15,13 +15,6 @@
     state: started
     enabled: true
 
-
-- name: Create Linux user for PostgreSQL
-  ansible.builtin.user:
-    name: "postgres"
-    state: present
-    create_home: true
-
 - name: Create database user for SonarQube
   become: true
   become_user: postgres
