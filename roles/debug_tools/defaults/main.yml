@@ -1,0 +1,13 @@
+---
+# Debug Tools role default variables
+
+# Alternative package names for Debian-based systems
+debug_tools_ripgrep_alt_package: "ripgrep"
+debug_tools_bat_alt_package: "batcat"
+
+# Create a symlink from batcat to bat for consistency
+debug_tools_create_bat_symlink: true
+
+# Additional debugging tools to install
+# Example: ["strace", "lsof", "tcpdump"]
+debug_tools_additional_packages: []

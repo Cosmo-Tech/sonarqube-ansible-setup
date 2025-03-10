@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Include debug_tools role
+      ansible.builtin.include_role:
+        name: debug_tools
+      vars:
+        debug_tools_additional_packages:
+          - lsof

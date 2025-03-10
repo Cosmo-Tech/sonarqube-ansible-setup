@@ -1,6 +1,12 @@
 ---
 # Main playbook for SonarQube installation
 
+- name: Install debugging tools
+  hosts: sonarqube
+  become: true
+  roles:
+    - debug_tools
+
 - name: Install and configure Docker
   hosts: sonarqube
   become: true
