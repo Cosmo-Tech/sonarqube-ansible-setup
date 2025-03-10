@@ -153,12 +153,16 @@ You can customize the installation by modifying the variables in:
 
 The project has been simplified to reduce duplication and make maintenance easier. Role-specific variables are kept in their respective role defaults to ensure they're always available when the role is executed, while common variables are centralized in group_vars/all.yml.
 
+### SonarQube Version
+
+This project is configured to install SonarQube 2025.1, the latest stable version. If you need to use a different version, you can modify the `sonarqube_version` variable in `roles/sonarqube/defaults/main.yml`.
+
 ## Vagrant VM Specifications
 
 The local development VM is configured with:
 - Debian 12 (Bookworm)
-- 4GB RAM
-- 2 CPU cores
+- 8GB RAM
+- 4 CPU cores
 - Port forwarding: 9000 (SonarQube) and 5432 (PostgreSQL)
 - Private IP: 192.168.56.10
 

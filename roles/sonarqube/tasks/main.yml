@@ -49,18 +49,10 @@
     url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
     dest: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
     mode: "0644"
-  when: sonarqube_version != "latest"
-
-- name: Download latest SonarQube ZIP
-  ansible.builtin.get_url:
-    url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_latest_version }}.zip"
-    dest: "/tmp/sonarqube-{{ sonarqube_latest_version }}.zip"
-    mode: "0644"
-  when: sonarqube_version == "latest"
 
 - name: Extract SonarQube ZIP
   ansible.builtin.unarchive:
-    src: "/tmp/sonarqube-{{ sonarqube_version if sonarqube_version != 'latest' else sonarqube_latest_version }}.zip"
+    src: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
     dest: "{{ sonarqube_base_dir }}"
     remote_src: true
     owner: sonarqube
