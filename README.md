@@ -24,7 +24,9 @@ uv pip install .
 ansible-playbook playbooks/main.yml
 
 # With specific password (optional) otherwise we generate one
-SONARQUBE_DB_PASSWORD="your_secure_password" ansible-playbook playbooks/main.yml
+read -s SONARQUBE_DB_PASSWORD
+export SONARQUBE_DB_PASSWORD
+ansible-playbook playbooks/main.yml
 ```
 
 ### Development with Vagrant
