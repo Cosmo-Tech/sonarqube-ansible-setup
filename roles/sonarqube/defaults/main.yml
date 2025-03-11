@@ -1,6 +1,6 @@
 ---
 # SonarQube role default variables
-sonarqube_version: "2025.1"  # Latest stable version
+sonarqube_version: "25.3.0.104237"
 sonarqube_port: "9000"
 
 # Directories
