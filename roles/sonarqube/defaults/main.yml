@@ -21,3 +21,6 @@ sonarqube_db_port: "5432"
 
 # Java options
 sonarqube_java_opts: "-Xmx2048m -Xms2048m"
+
+# Local file path
+sonarqube_local_zip_path: "~/Downloads"

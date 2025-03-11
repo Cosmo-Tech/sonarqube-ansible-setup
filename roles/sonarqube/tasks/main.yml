@@ -43,12 +43,30 @@
     state: present
     update_cache: true
 
-# Download and extract SonarQube
-- name: Download SonarQube ZIP
+# Check if local file exists
+- name: Check if local SonarQube ZIP exists
+  ansible.builtin.stat:
+    path: "{{ sonarqube_local_zip_path }}"
+  register: local_zip
+  when: sonarqube_local_zip_path | length > 0
+  ignore_errors: true
+
+# Use local file if available
+- name: Use local SonarQube ZIP if available
+  ansible.builtin.copy:
+    src: "{{ sonarqube_local_zip_path }}"
+    dest: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
+    mode: "0644"
+  when: sonarqube_local_zip_path | length > 0 and local_zip.stat.exists
+  register: local_copy
+
+# Download only if local file is not available
+- name: Download SonarQube ZIP if local file not available
   ansible.builtin.get_url:
     url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
     dest: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
     mode: "0644"
+  when: sonarqube_local_zip_path | length == 0 or not local_zip.stat.exists
 
 - name: Extract SonarQube ZIP
   ansible.builtin.unarchive:
