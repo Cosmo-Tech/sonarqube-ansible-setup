@@ -2,4 +2,3 @@
 # Development environment variables - only overrides from group_vars/all.yml
 
 # Development-specific password (overrides the environment variable lookup)
-postgresql_password: "devpassword"  # For development only

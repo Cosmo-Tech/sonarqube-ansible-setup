@@ -23,6 +23,24 @@
     state: started
     enabled: true
 
+- name: Check if PostgreSQL password is provided via environment variable
+  ansible.builtin.set_fact:
+    env_password: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD', default='') }}"
+  no_log: true
+
+- name: Use environment variable password if provided
+  ansible.builtin.set_fact:
+    postgresql_password: "{{ env_password }}"
+  when: env_password | length > 0
+  no_log: true
+
+- name: Generate random PostgreSQL password if not provided via environment
+  ansible.builtin.set_fact:
+    postgresql_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_letters,digits length=32') }}"
+  when: env_password | length == 0
+  no_log: true
+
+
 - name: Create database user for SonarQube
   become: true
   become_user: postgres
