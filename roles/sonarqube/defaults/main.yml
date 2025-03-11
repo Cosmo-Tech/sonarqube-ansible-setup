@@ -16,7 +16,7 @@ sonarqube_db_user: "{{ postgresql_user }}"
 sonarqube_db_password: "{{ postgresql_password }}"
 sonarqube_db_name: "{{ postgresql_db }}"
 sonarqube_db_schema: "{{ postgresql_schema }}"
-sonarqube_db_host: "localhost"  # Direct connection to local PostgreSQL
+sonarqube_db_host: "localhost" # Direct connection to local PostgreSQL
 sonarqube_db_port: "5432"
 
 # Java options
@@ -26,4 +26,4 @@ sonarqube_java_opts: "-Xmx2048m -Xms2048m"
 sonarqube_local_zip_path: "~/Downloads"
 
 # Firewall configuration
-sonarqube_configure_firewall: true  # Set to false to skip firewall configuration
+sonarqube_configure_firewall: true # Set to false to skip firewall configuration

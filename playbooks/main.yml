@@ -1,12 +1,6 @@
 ---
 # Main playbook for SonarQube installation
 
-- name: Install debugging tools
-  hosts: sonarqube
-  become: true
-  roles:
-    - debug_tools
-
 - name: Install and configure PostgreSQL for SonarQube
   hosts: sonarqube
   become: true

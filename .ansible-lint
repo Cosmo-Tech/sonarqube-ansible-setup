@@ -1,3 +1,4 @@
+---
 # Configuration file for ansible-lint
 # See: https://ansible-lint.readthedocs.io/configuring/
 
@@ -9,8 +10,6 @@ exclude_paths:
   - .vagrant/
   - .git/
   - .venv/
-  - molecule/
-  - tests/
 
 # Custom rule exclusions
 skip_list:
@@ -18,7 +17,7 @@ skip_list:
   - command-instead-of-module
   # Skip warning about task names
   - name[template]
-  - name[missing]  # Skip warning about missing task names
+  - name[missing] # Skip warning about missing task names
   # Skip warning about handler naming
   - name[casing]
   # Skip warning about file permissions
@@ -28,9 +27,9 @@ skip_list:
 
 # Enable most rules
 enable_list:
-  - fqcn-builtins  # Use fully qualified collection names
-  - no-log-password  # Check for sensitive data logging
-  - no-same-owner  # Warn about same owner in file tasks
+  - fqcn-builtins # Use fully qualified collection names
+  - no-log-password # Check for sensitive data logging
+  - no-same-owner # Warn about same owner in file tasks
 
 # Use parseable output format
 parseable: true
