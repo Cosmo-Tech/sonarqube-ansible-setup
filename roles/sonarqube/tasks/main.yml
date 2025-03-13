@@ -96,6 +96,8 @@
 - name: Add nftables rule for SonarQube port
   ansible.builtin.command: >
     nft add rule inet filter INPUT tcp dport {{ sonarqube_port }} accept comment \"Allow SonarQube web interface\"
+    nft add rule inet filter INPUT tcp dport 443 accept comment \"Allow HTTPS\"
+    nft add rule inet filter INPUT tcp dport 80 accept comment \"Allow HTTP\"
   when: sonarqube_configure_firewall | default(true)
 
 - name: Wait for SonarQube to be ready

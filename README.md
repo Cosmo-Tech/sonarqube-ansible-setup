@@ -7,13 +7,6 @@ This project contains Ansible playbooks to set up and manage SonarQube with Post
 - **For Production**: Ubuntu/Debian server with SSH access and sudo privileges
 - **For Development**: VirtualBox, Vagrant, Ansible, Python 3.8+
 
-## Quick Setup
-
-```sh
-# 1. Set up Python environment
-uv venv && source .venv/bin/activate
-uv pip install .
-```
 
 ## Usage
 
