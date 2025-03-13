@@ -46,5 +46,3 @@ vagrant destroy
 ```sh
 ansible-lint
 ```
-
-For more details on testing, see the test scripts in the `tests/` directory.
