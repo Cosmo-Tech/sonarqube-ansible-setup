@@ -1,14 +1,6 @@
 ---
 # Install SonarQube with docker
 
-- name: Install required packages
-  apt:
-    name:
-      - docker.io
-    state: present
-    update_cache: true
-  become: true
-
 - name: Create SonarQube directory
   file:
     path: "/opt/sonarqube"
@@ -45,9 +37,9 @@
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_extensions:/opt/sonarqube/extensions
     env:
-      SONAR_JDBC_URL: "jdbc:postgresql//localhost:5432/sonarqube"
-      SONAR_JDBC_USERNAME: "{{ postgresql_user }}"
-      SONAR_JDBC_PASSWORD: "{{ postgresql_password }}"
+      SONAR_JDBC_URL: "jdbc:postgresql://localhost:5432/sonarqube"
+      SONAR_JDBC_USERNAME: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_USER', default='sonarqube') }}"
+      SONAR_JDBC_PASSWORD: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD') }}"
   become: true
 
 - name: Wait for SonarQube to be available
