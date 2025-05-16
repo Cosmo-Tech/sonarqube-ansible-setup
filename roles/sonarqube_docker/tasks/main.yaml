@@ -1,6 +1,19 @@
 ---
 # Install SonarQube with docker
 
+- name: Pre-installation configuration
+  block:
+    - name: Increase memory map
+      ansible.posix.sysctl:
+        name: vm.max_map_count
+        value: "524288"
+        state: present
+    - name: Increase number of open file descriptors
+      ansible.posix.sysctl:
+        name: fs.file-max
+        value: "131072"
+        state: present
+
 - name: Create SonarQube directory
   file:
     path: "/opt/sonarqube"
@@ -25,11 +38,15 @@
   become: true
 
 - name: Create and start SonarQube container
-  docker_container:
+  community.docker.docker_container:
     name: sonarqube
     image: sonarqube:community
     state: started
     restart_policy: always
+    network_mode: host
+    ulimits:
+      - "nofile:131072:131072"
+      - "nproc:8192:8192"
     ports:
       - "9000:9000"
     volumes:
