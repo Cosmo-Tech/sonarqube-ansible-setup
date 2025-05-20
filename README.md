@@ -13,13 +13,13 @@ This project contains Ansible playbooks to set up and manage SonarQube with Post
 ### Production Deployment
 
 ```sh
-# Run the playbook
-ansible-playbook playbooks/main.yml
+# Run the playbook for production
+ansible-playbook -i inventory.yml -l production playbooks/main.yml
 
 # With specific password
 read -s SONARQUBE_DB_PASSWORD
 export SONARQUBE_DB_PASSWORD
-ansible-playbook playbooks/main.yml
+ansible-playbook -i inventory.yml -l production playbooks/main.yml
 ```
 
 ### Development with Vagrant
@@ -27,7 +27,7 @@ ansible-playbook playbooks/main.yml
 ```sh
 # Start VM and run playbook
 vagrant up
-ansible-playbook -i inventories/dev/hosts playbooks/main.yml
+ansible-playbook -i inventory.yml -l local playbooks/main.yml
 
 # Or provision during VM creation
 ANSIBLE_PROVISION=true vagrant up
@@ -46,3 +46,32 @@ vagrant destroy
 ```sh
 ansible-lint
 ```
+
+## Environment Usage
+
+The project supports three environments defined in a single `inventory.yml` file:
+
+### Local Development (Vagrant)
+```bash
+ansible-playbook -i inventory.yml -l local playbooks/main.yml
+```
+
+### Pre-production
+```bash
+ansible-playbook -i inventory.yml -l preprod playbooks/main.yml
+```
+
+### Production
+```bash
+ansible-playbook -i inventory.yml -l production playbooks/main.yml
+```
+
+### Inventory Structure
+
+The inventory is organized using Ansible groups:
+- `local`: Development environment using Vagrant VM
+- `preprod`: Pre-production environment
+- `production`: Production environment
+- `sonarqube`: Parent group containing all environments
+
+Common SSH and Python settings are defined at the root level, making configuration maintenance simpler and reducing duplication.
