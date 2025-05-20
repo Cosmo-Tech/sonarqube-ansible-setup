@@ -49,7 +49,7 @@ ansible-lint
 
 ## Environment Usage
 
-The project supports three environments defined in a single `inventory.yml` file:
+The project supports three environments defined in `inventory.yml`:
 
 ### Local Development (Vagrant)
 ```bash
@@ -65,13 +65,3 @@ ansible-playbook -i inventory.yml -l preprod playbooks/main.yml
 ```bash
 ansible-playbook -i inventory.yml -l production playbooks/main.yml
 ```
-
-### Inventory Structure
-
-The inventory is organized using Ansible groups:
-- `local`: Development environment using Vagrant VM
-- `preprod`: Pre-production environment
-- `production`: Production environment
-- `sonarqube`: Parent group containing all environments
-
-Common SSH and Python settings are defined at the root level, making configuration maintenance simpler and reducing duplication.
