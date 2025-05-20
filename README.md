@@ -16,7 +16,7 @@ This project contains Ansible playbooks to set up and manage SonarQube with Post
 # Run the playbook
 ansible-playbook playbooks/main.yml
 
-# With specific password (optional) otherwise we generate one
+# With specific password
 read -s SONARQUBE_DB_PASSWORD
 export SONARQUBE_DB_PASSWORD
 ansible-playbook playbooks/main.yml
