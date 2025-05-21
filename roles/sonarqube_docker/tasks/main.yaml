@@ -47,8 +47,6 @@
     ulimits:
       - "nofile:131072:131072"
       - "nproc:8192:8192"
-    ports:
-      - "9000:9000"
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_logs:/opt/sonarqube/logs
