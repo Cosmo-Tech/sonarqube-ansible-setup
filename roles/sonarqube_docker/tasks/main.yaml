@@ -1,0 +1,79 @@
+---
+# Install SonarQube with docker
+
+- name: Pre-installation configuration
+  block:
+    - name: Increase memory map
+      ansible.posix.sysctl:
+        name: vm.max_map_count
+        value: "524288"
+        state: present
+    - name: Increase number of open file descriptors
+      ansible.posix.sysctl:
+        name: fs.file-max
+        value: "131072"
+        state: present
+
+- name: Create SonarQube directory
+  file:
+    path: "/opt/sonarqube"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Create Docker named volumes
+  docker_volume:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - sonarqube_data
+    - sonarqube_logs
+    - sonarqube_extensions
+  become: true
+
+- name: Pull SonarQube image
+  docker_image:
+    name: sonarqube:community
+    source: pull
+  become: true
+
+- name: Create and start SonarQube container
+  community.docker.docker_container:
+    name: sonarqube
+    image: sonarqube:community
+    state: started
+    restart_policy: always
+    network_mode: host
+    ulimits:
+      - "nofile:131072:131072"
+      - "nproc:8192:8192"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    env:
+      SONAR_JDBC_URL: "jdbc:postgresql://localhost:5432/sonarqube"
+      SONAR_JDBC_USERNAME: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_USER', default='sonarqube') }}"
+      SONAR_JDBC_PASSWORD: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD') }}"
+  become: true
+
+# Firewall configuration
+
+- name: Add nftables rules
+  ansible.builtin.command:
+    cmd: "nft add rule inet filter INPUT tcp dport {{ item.port }} accept comment '{{ item.comment }}'"
+  loop:
+    - { port: 9000, comment: "SonarQubeWeb" }
+    - { port: 443, comment: "HTTPS" }
+    - { port: 80, comment: "HTTP" }
+  become: true
+
+- name: Wait for SonarQube to be available
+  uri:
+    url: "http://localhost:9000"
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+  become: false

@@ -1,14 +1,20 @@
 ---
 # Main playbook for SonarQube installation
 
-- name: Install and configure PostgreSQL for SonarQube
+- name: Install Docker
+  hosts: sonarqube
+  become: true
+  roles:
+    - docker
+
+- name: Install PostgreSQL
   hosts: sonarqube
   become: true
   roles:
     - postgresql
 
-- name: Install and configure SonarQube
+- name: Install sonarqube with Docker
   hosts: sonarqube
   become: true
   roles:
-    - sonarqube
+    - sonarqube_docker
