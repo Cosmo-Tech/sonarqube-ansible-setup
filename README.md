@@ -13,9 +13,6 @@ This project contains Ansible playbooks to set up and manage SonarQube with Post
 ### Production Deployment
 
 ```sh
-# Run the playbook for production
-ansible-playbook -i inventory.yml -l production playbooks/main.yml
-
 # With specific password
 read -s SONARQUBE_DB_PASSWORD
 export SONARQUBE_DB_PASSWORD
@@ -58,7 +55,7 @@ ansible-playbook -i inventory.yml -l local playbooks/main.yml
 
 ### Pre-production
 ```bash
-ansible-playbook -i inventory.yml -l preprod playbooks/main.yml
+ansible-playbook -e "ansible_port=PORT_NUMBER" -i inventory.yml -l preprod playbooks/main.yml
 ```
 
 ### Production

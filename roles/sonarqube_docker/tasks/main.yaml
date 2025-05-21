@@ -59,6 +59,17 @@
       SONAR_JDBC_PASSWORD: "{{ lookup('ansible.builtin.env', 'SONARQUBE_DB_PASSWORD') }}"
   become: true
 
+# Firewall configuration
+
+- name: Add nftables rules
+  ansible.builtin.command:
+    cmd: "nft add rule inet filter INPUT tcp dport {{ item.port }} accept comment '{{ item.comment }}'"
+  loop:
+    - { port: 9000, comment: "SonarQubeWeb" }
+    - { port: 443, comment: "HTTPS" }
+    - { port: 80, comment: "HTTP" }
+  become: true
+
 - name: Wait for SonarQube to be available
   uri:
     url: "http://localhost:9000"
