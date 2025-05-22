@@ -58,6 +58,22 @@
   become: true
 
 # Firewall configuration
+- name: Check if nftables is in use
+  ansible.builtin.command:
+    cmd: "which nft"
+  register: nft_check
+  ignore_errors: true
+  changed_when: false
+  become: true
+
+- name: Check if filter table exists
+  ansible.builtin.command:
+    cmd: "nft list table inet filter"
+  register: table_check
+  ignore_errors: true
+  changed_when: false
+  become: true
+  when: nft_check.rc == 0
 
 - name: Add nftables rules
   ansible.builtin.command:
@@ -67,6 +83,9 @@
     - { port: 443, comment: "HTTPS" }
     - { port: 80, comment: "HTTP" }
   become: true
+  when:
+    - table_check.rc == 0
+    - nft_check.rc == 0
 
 - name: Wait for SonarQube to be available
   uri:
