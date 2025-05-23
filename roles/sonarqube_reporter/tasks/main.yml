@@ -1,0 +1,81 @@
+---
+# Tasks for sonarqube_reporter role
+
+- name: Ensure git is installed
+  ansible.builtin.package:
+    name: git
+    state: present
+  become: true
+
+- name: Ensure Python3 and pip are installed
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+  become: true
+
+- name: Get currently installed version
+  ansible.builtin.command:
+    cmd: "git describe --tags"
+    chdir: "{{ sonarqube_reporter_install_dir | expanduser }}"
+  register: current_version
+  ignore_errors: true
+  changed_when: false
+  become: true
+  become_user: "{{ sonarqube_reporter_user }}"
+
+- name: Create installation directory
+  ansible.builtin.file:
+    path: "{{ sonarqube_reporter_install_dir | expanduser }}"
+    state: directory
+    owner: "{{ sonarqube_reporter_user }}"
+    mode: '0755'
+  when: current_version.rc != 0 or sonarqube_reporter_force_update
+
+- name: Clone sonarqube-reporter repository
+  ansible.builtin.git:
+    repo: "{{ sonarqube_reporter_repo }}"
+    dest: "{{ sonarqube_reporter_install_dir | expanduser }}"
+    version: "{{ sonarqube_reporter_version }}"
+    update: "{{ sonarqube_reporter_force_update }}"
+  become: true
+  become_user: "{{ sonarqube_reporter_user }}"
+  when: current_version.rc != 0 or sonarqube_reporter_force_update or
+        (current_version.stdout != sonarqube_reporter_version and sonarqube_reporter_version != 'main')
+
+- name: Remove existing venv if updating
+  ansible.builtin.file:
+    path: "{{ sonarqube_reporter_install_dir | expanduser }}/.venv"
+    state: absent
+  become: true
+  become_user: "{{ sonarqube_reporter_user }}"
+  when: current_version.rc != 0 or sonarqube_reporter_force_update or
+        (current_version.stdout != sonarqube_reporter_version and sonarqube_reporter_version != 'main')
+
+- name: Create venv and install dependencies with uv
+  ansible.builtin.command:
+    cmd: "uv venv"
+    chdir: "{{ sonarqube_reporter_install_dir | expanduser }}"
+  become: true
+  become_user: "{{ sonarqube_reporter_user }}"
+  when: current_version.rc != 0 or sonarqube_reporter_force_update or
+        (current_version.stdout != sonarqube_reporter_version and sonarqube_reporter_version != 'main')
+
+- name: Install package with uv pip
+  ansible.builtin.command:
+    cmd: ".venv/bin/uv pip install -e ."
+    chdir: "{{ sonarqube_reporter_install_dir | expanduser }}"
+  become: true
+  become_user: "{{ sonarqube_reporter_user }}"
+  when: current_version.rc != 0 or sonarqube_reporter_force_update or
+        (current_version.stdout != sonarqube_reporter_version and sonarqube_reporter_version != 'main')
+
+- name: Add sonarqube-reporter virtual environment to PATH
+  ansible.builtin.lineinfile:
+    path: "~{{ sonarqube_reporter_user }}/.bashrc"
+    line: 'export PATH="{{ sonarqube_reporter_install_dir | expanduser }}/.venv/bin:$PATH"'
+    state: present
+    create: true
+  become: true
+  become_user: "{{ sonarqube_reporter_user }}"

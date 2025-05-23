@@ -1,0 +1,19 @@
+---
+# defaults for sonarqube_reporter role
+
+# Git repository details
+sonarqube_reporter_repo: "https://github.com/Cosmo-Tech/sonarqube-reporter"
+
+# Version to install - can be a tag (e.g. "v1.0.0") or branch name (e.g. "main")
+# Set to 'main' for latest development version
+# Set to a specific tag like 'v1.0.0' for a stable release
+sonarqube_reporter_version: "v0.3.1"
+
+# Whether to force update if version is already installed
+sonarqube_reporter_force_update: false
+
+# Installation directory (in user's home)
+sonarqube_reporter_install_dir: "~/sonarqube-reporter"
+
+# User for installation
+sonarqube_reporter_user: "{{ ansible_user }}"

@@ -1,0 +1,19 @@
+---
+# defaults for sonarqube_scanner role
+
+# Git repository details
+sonarqube_scanner_repo: "https://github.com/Cosmo-Tech/sonarqube-scanner"
+
+# Version to install - can be a tag (e.g. "v1.0.0") or branch name (e.g. "main")
+# Set to 'main' for latest development version
+# Set to a specific tag like 'v1.0.0' for a stable release
+sonarqube_scanner_version: "v0.7.0"
+
+# Whether to force update if version is already installed
+sonarqube_scanner_force_update: false
+
+# Installation directory (in user's home)
+sonarqube_scanner_install_dir: "{{ ansible_env.HOME }}/sonarqube-scanner"
+
+# User for installation
+sonarqube_scanner_user: "{{ ansible_user }}"

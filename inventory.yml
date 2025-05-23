@@ -6,6 +6,7 @@ all:
         sonarqube-dev:
           ansible_host: 192.168.56.10
           ansible_user: vagrant
+          ansible_become_user: root
           ansible_ssh_private_key_file: .vagrant/machines/default/virtualbox/private_key
 
     preprod:
@@ -13,12 +14,14 @@ all:
         sonarqube-preview:
           ansible_host: sonarqube-preview.cosmotech.com
           ansible_user: terminator
+          ansible_become_user: sonarqube
 
     production:
       hosts:
         sonarqube-prod:
           ansible_host: sonarqube.cosmotech.com
-          ansible_user: ansible
+          ansible_user: terminator
+          ansible_become_user: sonarqube
 
     sonarqube:
       children:

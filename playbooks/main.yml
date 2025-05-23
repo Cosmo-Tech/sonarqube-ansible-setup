@@ -16,5 +16,23 @@
 - name: Install sonarqube with Docker
   hosts: sonarqube
   become: true
+  become_user: root
   roles:
     - sonarqube_docker
+
+- name: Install Python UV Package Manager
+  hosts: sonarqube
+  become: true
+  vars:
+    sonarqube_scanner_user: "{{ ansible_user }}"
+  roles:
+    - uv
+
+- name: Install SonarQube Tools
+  hosts: sonarqube
+  become: true
+  vars:
+    sonarqube_scanner_user: "{{ ansible_user }}"
+  roles:
+    - sonarqube_scanner
+    - sonarqube_reporter

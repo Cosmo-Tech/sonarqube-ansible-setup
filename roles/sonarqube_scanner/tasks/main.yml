@@ -1,0 +1,83 @@
+---
+# Tasks for sonarqube_scanner role
+
+- name: Ensure git is installed
+  ansible.builtin.package:
+    name: git
+    state: present
+  become_user: root
+  become: true
+
+- name: Ensure Python3 and pip are installed
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+  become_user: root
+  become: true
+
+- name: Get currently installed version
+  ansible.builtin.command:
+    cmd: "git describe --tags"
+    chdir: "{{ sonarqube_scanner_install_dir | expanduser }}"
+  register: current_version
+  ignore_errors: true
+  changed_when: false
+  become: true
+  become_user: "{{ sonarqube_scanner_user }}"
+
+- name: Create installation directory
+  ansible.builtin.file:
+    path: "{{ sonarqube_scanner_install_dir | expanduser }}"
+    state: directory
+    owner: "{{ sonarqube_scanner_user }}"
+    mode: '0755'
+  when: current_version.rc != 0 or sonarqube_scanner_force_update
+
+- name: Clone sonarqube-scanner repository
+  ansible.builtin.git:
+    repo: "{{ sonarqube_scanner_repo }}"
+    dest: "{{ sonarqube_scanner_install_dir | expanduser }}"
+    version: "{{ sonarqube_scanner_version }}"
+    update: "{{ sonarqube_scanner_force_update }}"
+  become: true
+  become_user: "{{ sonarqube_scanner_user }}"
+  when: current_version.rc != 0 or sonarqube_scanner_force_update or
+        (current_version.stdout != sonarqube_scanner_version and sonarqube_scanner_version != 'main')
+
+- name: Remove existing venv if updating
+  ansible.builtin.file:
+    path: "{{ sonarqube_scanner_install_dir | expanduser }}/.venv"
+    state: absent
+  become: true
+  become_user: "{{ sonarqube_scanner_user }}"
+  when: current_version.rc != 0 or sonarqube_scanner_force_update or
+        (current_version.stdout != sonarqube_scanner_version and sonarqube_scanner_version != 'main')
+
+- name: Create venv and install dependencies with uv
+  ansible.builtin.command:
+    cmd: "uv venv"
+    chdir: "{{ sonarqube_scanner_install_dir | expanduser }}"
+  become: true
+  become_user: "{{ sonarqube_scanner_user }}"
+  when: current_version.rc != 0 or sonarqube_scanner_force_update or
+        (current_version.stdout != sonarqube_scanner_version and sonarqube_scanner_version != 'main')
+
+- name: Install package with uv pip
+  ansible.builtin.command:
+    cmd: ".venv/bin/uv pip install -e ."
+    chdir: "{{ sonarqube_scanner_install_dir | expanduser }}"
+  become: true
+  become_user: "{{ sonarqube_scanner_user }}"
+  when: current_version.rc != 0 or sonarqube_scanner_force_update or
+        (current_version.stdout != sonarqube_scanner_version and sonarqube_scanner_version != 'main')
+
+- name: Add sonarqube-scanner virtual environment to PATH
+  ansible.builtin.lineinfile:
+    path: "~{{ sonarqube_scanner_user }}/.bashrc"
+    line: 'export PATH="{{ sonarqube_scanner_install_dir | expanduser }}/.venv/bin:$PATH"'
+    state: present
+    create: true
+  become: true
+  become_user: "{{ sonarqube_scanner_user }}"

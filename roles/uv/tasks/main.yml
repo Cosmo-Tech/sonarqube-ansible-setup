@@ -1,0 +1,66 @@
+---
+# Tasks for installing Python UV package manager
+
+- name: Install required system packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - ca-certificates
+    state: present
+    update_cache: true
+  become_user: root
+  become: true
+
+- name: Check if UV is already installed
+  ansible.builtin.command:
+    cmd: which uv
+  register: uv_check
+  changed_when: false
+  failed_when: false
+
+- name: Create temporary directory for UV download
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: uv
+  register: temp_dir
+  when: uv_check.rc != 0
+
+- name: Download UV installer script
+  ansible.builtin.get_url:
+    url: "https://astral.sh/uv/install.sh"
+    dest: "{{ temp_dir.path }}/install.sh"
+    mode: '0755'
+  when: uv_check.rc != 0
+  register: download_result
+
+- name: Install UV
+  ansible.builtin.command:
+    cmd: "./install.sh"
+    chdir: "{{ temp_dir.path }}"
+  when: uv_check.rc != 0 and download_result is success
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_dir.path }}"
+    state: absent
+  when: temp_dir.path is defined
+
+- name: Ensure ~/.local/bin is in PATH
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    state: present
+    create: true
+  register: path_update
+
+- name: Verify UV installation
+  ansible.builtin.command:
+    cmd: "{{ ansible_env.HOME }}/.local/bin/uv --version"
+  register: uv_version
+  changed_when: false
+  failed_when: uv_version.rc != 0
+
+- name: Display UV version
+  ansible.builtin.debug:
+    msg: "UV version: {{ uv_version.stdout_lines[-1] if uv_version.stdout_lines is defined else 'Unknown' }}"
+  when: uv_version.rc is defined and uv_version.rc == 0
